@@ -10,27 +10,39 @@ TileMap::TileMap(float gridSize, unsigned width, unsigned height)
     this->maxSize.y = height;
     this->layers = 1;
 
+    this->map.resize(this->maxSize.x, std::vector< std::vector <Tile*> > ());
+
     for(size_t i = 0; i<this->maxSize.x; i++)
     {
-        this->map.push_back(std::vector< std::vector <Tile> > ());
-
         for(size_t j = 0; j<this->maxSize.y; j++)
         {
-            this->map[i].resize(this->maxSize.y);
-            this->map[i].push_back(std::vector<Tile> ());
+            this->map[i].resize(this->maxSize.y, std::vector<Tile*> ());
 
             for(size_t k = 0; k<this->layers; k++)
             {
-                this->map[i][j].resize(this->layers);
-                this->map[i][j].push_back(Tile(i * this->gridSizeF, j * this->gridSizeF, this->gridSizeF));
+                this->map[i][j].resize(this->layers, nullptr);
             }
         }
+    }
+
+    if(!this->tileTextureSheet.loadFromFile("Resources/Images/Tiles/grass1.png"))
+    {
+        std::cout<<"ERROR::TILEMAP::FAILED TO LOAD TILETEXTURESHEET"<<std::endl;
     }
 }
 
 TileMap::~TileMap()
 {
-
+    for(size_t i = 0; i<this->maxSize.x; i++)
+    {
+        for(size_t j = 0; j<this->maxSize.y; j++)
+        {
+            for(size_t k = 0; k<this->layers; k++)
+            {
+                delete this->map[i][j][k];
+            }
+        }
+    }
 }
 
 //functions
@@ -45,20 +57,40 @@ void TileMap::render(sf::RenderTarget &target)
     {
         for(auto &j: i)
         {
-            for(auto &k: j)
+            for(auto *k: j)
             {
-                k.render(target);
+                if(k != nullptr)
+                {
+                    k->render(target);
+                }
             }
         }
     }
 }
 
-void TileMap::addTile()
+void TileMap::addTile(const unsigned x, const unsigned y, const unsigned z)
 {
-
+    if(x < this->maxSize.x && x >= 0 &&
+            y < this->maxSize.y && y >= 0 &&
+            z < this->layers && z >= 0)
+    {
+        if(this->map[x][y][z] == nullptr)
+        {
+            this->map[x][y][z] = new Tile(x * this->gridSizeF, y * this->gridSizeF, this->gridSizeF, this->tileTextureSheet);
+        }
+    }
 }
 
-void TileMap::removeTile()
+void TileMap::removeTile(const unsigned x, const unsigned y, const unsigned z)
 {
-
+    if(x < this->maxSize.x && x >= 0 &&
+            y < this->maxSize.y && y >= 0 &&
+            z < this->layers && z >= 0)
+    {
+        if(this->map[x][y][z] != nullptr)
+        {
+            delete this->map[x][y][z];
+            this->map[x][y][z] = nullptr;
+        }
+    }
 }
