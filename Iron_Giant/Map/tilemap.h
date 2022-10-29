@@ -25,7 +25,7 @@ public:
     //functions
     void update();
     void render(sf::RenderTarget &target);
-    void addTile(const unsigned x, const unsigned y, const unsigned z);
+    void addTile(const unsigned x, const unsigned y, const unsigned z, const sf::IntRect &texture_rect);
     void removeTile(const unsigned x, const unsigned y, const unsigned z);
 };
 

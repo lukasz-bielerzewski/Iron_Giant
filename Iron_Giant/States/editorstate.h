@@ -23,6 +23,7 @@ private:
 
     TileMap* tileMap;
 
+    sf::IntRect textureRect;
     sf::RectangleShape selectorRect;
 
     //intitializing fucntions
