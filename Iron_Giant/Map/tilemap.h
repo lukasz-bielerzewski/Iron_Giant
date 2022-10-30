@@ -22,6 +22,9 @@ public:
     TileMap(float gridSize, unsigned width, unsigned height);
     virtual ~TileMap();
 
+    //getters
+    const sf::Texture *getTileTextureSheet() const;
+
     //functions
     void update();
     void render(sf::RenderTarget &target);
