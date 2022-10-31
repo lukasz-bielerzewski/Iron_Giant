@@ -27,6 +27,8 @@ private:
     sf::IntRect textureRect;
     sf::RectangleShape selectorRect;
 
+    gui::TextureSelector *textureSelector;
+
     //intitializing fucntions
     void initBackground();
     void initVariables();
