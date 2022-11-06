@@ -57,7 +57,7 @@ namespace gui
     private:
         //variables
         float keytime;
-        float keytimeMax;
+        const float keytimeMax;
         sf::Font &font;
         gui::Button *activeElement;
         std::vector<gui::Button*> list;
@@ -84,6 +84,8 @@ namespace gui
     {
     private:
         //variables
+        float keytime;
+        float keytimeMax;
         sf::RectangleShape bounds;
         sf::Sprite sheet;
         sf::RectangleShape selector;
@@ -91,18 +93,22 @@ namespace gui
         sf::IntRect textureRect;
         float gridSize;
         bool active;
+        bool hidden;
+        gui::Button *hide_btn;
 
     public:
         //constructors/destructors
-        TextureSelector(float x, float y, float width, float height, float gridSize, const sf::Texture *texture_sheet);
+        TextureSelector(float x, float y, float width, float height, float gridSize, const sf::Texture *texture_sheet, sf::Font &font, std::string text);
         virtual ~TextureSelector();
 
         //getters
         const bool &getActive() const;
         const sf::IntRect &getTextureRect() const;
+        bool getKeytime();
 
         //functions
-        void update(const sf::Vector2i &mousePosWindow);
+        void updateKeytime(const float &dt);
+        void update(const sf::Vector2i &mousePosWindow, const float &dt);
         void render(sf::RenderTarget &target);
     };
 }
