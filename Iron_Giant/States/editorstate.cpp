@@ -67,7 +67,7 @@ void EditorState::initGui()
 
 void EditorState::initTileMap()
 {
-    this->tileMap = new TileMap(this->stateData->gridSize, 10, 10);
+    this->tileMap = new TileMap(this->stateData->gridSize, 10, 10, "Resources/Images/Tiles/tilesheet1.png");
 }
 
 void EditorState::initPauseMenu()
@@ -75,6 +75,8 @@ void EditorState::initPauseMenu()
     this->pmenu = new PauseMenu(*this->window, this->font);
 
     this->pmenu->addButton("QUIT", 800.f, "Quit");
+    this->pmenu->addButton("SAVE", 300.f, "Save map");
+    this->pmenu->addButton("LOAD", 400.f, "Load map");
 }
 
 //contructors/destructors
@@ -181,6 +183,16 @@ void EditorState::updatePauseMenuButtons()
     if(this->pmenu->isButtonPressed("QUIT"))
     {
         this->endState();
+    }
+
+    if(this->pmenu->isButtonPressed("SAVE"))
+    {
+        this->tileMap->saveToFile("text.igmp");
+    }
+
+    if(this->pmenu->isButtonPressed("LOAD"))
+    {
+        this->tileMap->loadFromFile("text.igmp");
     }
 }
 
