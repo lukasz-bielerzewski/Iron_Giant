@@ -17,10 +17,12 @@ PRECOMPILED_HEADER = Source_Files/pch.h
 
 SOURCES += \
     Components/animationcomponent.cpp \
+    Components/attributecomponent.cpp \
     Components/hitboxcomponent.cpp \
     Components/movementcomponent.cpp \
     Entities/entity.cpp \
     GUI/pausemenu.cpp \
+    GUI/playergui.cpp \
     Map/tilemap.cpp \
     Resource_Files/graphicssettings.cpp \
     Resource_Files/gui.cpp \
@@ -36,10 +38,12 @@ SOURCES += \
 
 HEADERS += \
     Components/animationcomponent.h \
+    Components/attributecomponent.h \
     Components/hitboxcomponent.h \
     Components/movementcomponent.h \
     Entities/entity.h \
     GUI/pausemenu.h \
+    GUI/playergui.h \
     Map/tilemap.h \
     Resource_Files/graphicssettings.h \
     Resource_Files/gui.h \

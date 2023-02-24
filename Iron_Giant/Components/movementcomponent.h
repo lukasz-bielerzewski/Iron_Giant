@@ -31,6 +31,11 @@ public:
     //update functions
     void move(const float dir_x, const float dir_y, const float &dt);
     void update(const float &dt);
+
+    //functions
+    void stopVelocity();
+    void stopVelocityX();
+    void stopVelocityY();
 };
 
 #endif // MOVEMENTCOMPONENT_H

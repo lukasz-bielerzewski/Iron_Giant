@@ -21,10 +21,18 @@ public:
     Player(float x, float y, sf::Texture &texture_sheet);
     virtual ~Player();
 
+    //getters
+    AttributeComponent *getAttributeComponent();
+
     //functions
     void updateAttack();
+    void loseHp(const int hp);
+    void loseExp(const int exp);
+    void gainHp(const int hp);
+    void gainExp(const int exp);
     void updateAnimation(const float &dt);
-    virtual void update(const float &dt);
+    void update(const float &dt);
+    void render(sf::RenderTarget &target);
 };
 
 #endif // PLAYER_H

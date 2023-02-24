@@ -2,6 +2,21 @@
 #include "gamestate.h"
 
 //initializing functions
+void GameState::initDefferedRender()
+{
+    this->renderTexture.create(this->stateData->gfxSettings->resolution.width, this->stateData->gfxSettings->resolution.height);
+    this->renderSprite.setTexture(this->renderTexture.getTexture());
+    this->renderSprite.setTextureRect(sf::IntRect(0, 0, this->stateData->gfxSettings->resolution.width, this->stateData->gfxSettings->resolution.height));
+}
+
+void GameState::initView()
+{
+    this->view.setSize(sf::Vector2f(static_cast<float>(this->stateData->gfxSettings->resolution.width),
+                                    static_cast<float>(this->stateData->gfxSettings->resolution.height)));
+    this->view.setCenter(sf::Vector2f(static_cast<float>(this->stateData->gfxSettings->resolution.width) / 2.f,
+                                      static_cast<float>(this->stateData->gfxSettings->resolution.height) / 2.f));
+}
+
 void GameState::initKeybinds()
 {
     std::ifstream ifs("Config/gamestate_keybinds.ini");
@@ -48,20 +63,30 @@ void GameState::initPlayer()
     this->player = new Player(0, 0, this->textures["PLAYER_SHEET"]);
 }
 
+void GameState::initPlayerGUI()
+{
+    this->playerGUI = new PlayerGUI(this->player);
+}
+
 void GameState::initTileMap()
 {
-    this->tileMap = new TileMap(this->stateData->gridSize, 10, 10, "Resources/Images/Tiles/tilesheet1.png");
+    this->tileMap = new TileMap(this->stateData->gridSize, 100, 100, "Resources/Images/Tiles/tilesheet1.png");
+    this->tileMap->loadFromFile("text.igmp");
 }
 
 //contructors/destructors
 GameState::GameState(StateData *state_data)
     : State(state_data)
 {
+    this->initDefferedRender();
+    this->initView();
     this->initKeybinds();
     this->initFonts();
     this->initTextures();
     this->initPauseMenu();
+
     this->initPlayer();
+    this->initPlayerGUI();
     this->initTileMap();
 }
 
@@ -69,10 +94,16 @@ GameState::~GameState()
 {
     delete this->pmenu;
     delete this->player;
+    delete this->playerGUI;
     delete this->tileMap;
 }
 
 //update functions
+void GameState::updateView(const float &dt)
+{
+    this->view.setCenter(std::floor(this->player->getPosition().x), std::floor(this->player->getPosition().y));
+}
+
 void GameState::updateInput(const float &dt)
 {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key(this->keybinds.at("CLOSE"))) && this->getKeytime())
@@ -111,6 +142,11 @@ void GameState::updatePlayerInput(const float &dt)
     }
 }
 
+void GameState::updatePlayerGUI(const float &dt)
+{
+    this->playerGUI->update(dt);
+}
+
 void GameState::updatePauseMenuButtons()
 {
     if(this->pmenu->isButtonPressed("QUIT"))
@@ -119,21 +155,33 @@ void GameState::updatePauseMenuButtons()
     }
 }
 
+void GameState::updateTileMap(const float &dt)
+{
+    this->tileMap->update();
+    this->tileMap->updateCollision(this->player, dt);
+}
+
 void GameState::update(const float &dt)
 {
-    this->updateMousePositions();
+    this->updateMousePositions(&this->view);
     this->updateKeytime(dt);
     this->updateInput(dt);
 
     if(!this->paused)
     {
+        this->updateView(dt);
+
         this->updatePlayerInput(dt);
 
+        this->updateTileMap(dt);
+
         this->player->update(dt);
+
+        this->playerGUI->update(dt);
     }
     else
     {
-        this->pmenu->update(this->mousePosView);
+        this->pmenu->update(this->mousePosWindow);
         this->updatePauseMenuButtons();
     }
 }
@@ -146,12 +194,25 @@ void GameState::render(sf::RenderTarget *target)
         target = this->window;
     }
 
-    //this->map.render(*target);
+    this->renderTexture.clear();
 
-    this->player->render(*target);
+    this->renderTexture.setView(this->view);
+    this->tileMap->render(this->renderTexture, this->player->getGridPosition(static_cast<int>(this->stateData->gridSize)));
+
+    this->player->render(this->renderTexture);
+
+    this->tileMap->renderDeferred(this->renderTexture);
+
+    this->renderTexture.setView(this->renderTexture.getDefaultView());
+    this->playerGUI->render(this->renderTexture);
 
     if(this->paused)
     {
-        this->pmenu->render(*target);
+        //this->renderTexture.setView(this->renderTexture.getDefaultView());
+        this->pmenu->render(this->renderTexture);
     }
+
+    this->renderTexture.display();
+    this->renderSprite.setTexture(this->renderTexture.getTexture());
+    target->draw(this->renderSprite);
 }
