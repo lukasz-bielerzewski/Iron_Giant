@@ -17,6 +17,8 @@
 #include <sstream>
 #include <fstream>
 #include <tgmath.h>
+#include <cstdlib>
+#include <ctime>
 
 //SFML
 #include <SFML\System.hpp>

@@ -10,13 +10,19 @@ class Player : public Entity
 {
 private:
     //variables
-    bool attacking;
+    bool rendAHL;
+    bool rendAHR;
 
     //initializing functions
     void initVariables();
     void initComponents();
 
 public:
+    bool attacking;
+    bool dead;
+    sf::RectangleShape attackHitboxLeft;
+    sf::RectangleShape attackHitboxRight;
+
     //constructors/destructors
     Player(float x, float y, sf::Texture &texture_sheet);
     virtual ~Player();

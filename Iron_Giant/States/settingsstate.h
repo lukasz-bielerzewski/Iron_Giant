@@ -24,12 +24,11 @@ private:
     std::vector<sf::VideoMode> modes;
 
     //intitializing fucntions
-    void initBackground();
     void initVariables();
     void initFonts();
     void initKeybinds();
     void initGui();
-    void initText();
+    void resetGui();
 
 public:
     //constructors/destructors

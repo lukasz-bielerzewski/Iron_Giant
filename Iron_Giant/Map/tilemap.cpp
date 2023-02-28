@@ -85,11 +85,11 @@ const sf::Texture *TileMap::getTileTextureSheet() const
 
 int TileMap::getLayerSize(const int x, const int y, const int layer) const
 {
-    if(x >= 0 && static_cast<size_t>(x) < this->map.size())
+    if(x >= 0 && x < static_cast<int>(this->map.size()))
     {
-        if(y >= 0 && static_cast<size_t>(y) < map[x].size())
+        if(y >= 0 && y < static_cast<int>(map[x].size()))
         {
-            if(layer >= 0 && static_cast<size_t>(layer) < map[x][y].size())
+            if(layer >= 0 && layer < static_cast<int>(map[x][y].size()))
             {
                 return this->map[x][y][layer].size();
             }
@@ -109,7 +109,7 @@ void TileMap::render(sf::RenderTarget &target, const sf::Vector2i &gridPosition)
 {
     this->layer = 0;
 
-    this->fromX = gridPosition.x - 4;
+    this->fromX = gridPosition.x - 6;
     if(this->fromX < 0)
     {
         this->fromX = 0;
@@ -119,7 +119,7 @@ void TileMap::render(sf::RenderTarget &target, const sf::Vector2i &gridPosition)
         this->fromX = this->maxSizeWorldGrid.x;
     }
 
-    this->toX = gridPosition.x + 5;
+    this->toX = gridPosition.x + 7;
     if(this->toX < 0)
     {
         this->toX = 0;
@@ -129,7 +129,7 @@ void TileMap::render(sf::RenderTarget &target, const sf::Vector2i &gridPosition)
         this->toX = this->maxSizeWorldGrid.x;
     }
 
-    this->fromY = gridPosition.y - 4;
+    this->fromY = gridPosition.y - 6;
     if(this->fromY < 0)
     {
         this->fromY = 0;
@@ -139,7 +139,7 @@ void TileMap::render(sf::RenderTarget &target, const sf::Vector2i &gridPosition)
         this->fromY = this->maxSizeWorldGrid.y;
     }
 
-    this->toY = gridPosition.y + 5;
+    this->toY = gridPosition.y + 7;
     if(this->toY < 0)
     {
         this->toY = 0;
@@ -213,22 +213,26 @@ void TileMap::updateCollision(Entity *entity, const float &dt)
     {
         entity->setPosition(0.f, entity->getPosition().y);
         entity->stopVelocityX();
+        entity->collision = true;
     }
     else if(entity->getPosition().x + entity->getGlobalBounds().width > this->maxSizeWorldF.x)
     {
         entity->setPosition(this->maxSizeWorldF.x - entity->getGlobalBounds().width, entity->getPosition().y);
         entity->stopVelocityX();
+        entity->collision = true;
     }
 
     if(entity->getPosition().y < 0.f)
     {
         entity->setPosition(entity->getPosition().x, 0.f);
         entity->stopVelocityY();
+        entity->collision = true;
     }
     else if(entity->getPosition().y + entity->getGlobalBounds().height > this->maxSizeWorldF.y)
     {
         entity->setPosition(entity->getPosition().x, this->maxSizeWorldF.y - entity->getGlobalBounds().height);
         entity->stopVelocityY();
+        entity->collision = true;
     }
 
 
@@ -295,6 +299,7 @@ void TileMap::updateCollision(Entity *entity, const float &dt)
                     {
                         entity->stopVelocityY();
                         entity->setPosition(playerBounds.left, wallBounds.top - playerBounds.height);
+                        entity->collision = true;
                     }
                     //top collision
                     else if(playerBounds.top > wallBounds.top
@@ -304,6 +309,7 @@ void TileMap::updateCollision(Entity *entity, const float &dt)
                     {
                         entity->stopVelocityY();
                         entity->setPosition(playerBounds.left, wallBounds.top + wallBounds.height);
+                        entity->collision = true;
                     }
 
                     //right collision
@@ -314,6 +320,7 @@ void TileMap::updateCollision(Entity *entity, const float &dt)
                     {
                         entity->stopVelocityX();
                         entity->setPosition(wallBounds.left - playerBounds.width, playerBounds.top);
+                        entity->collision = true;
                     }
                     //left collision
                     else if(playerBounds.left > wallBounds.left
@@ -323,6 +330,7 @@ void TileMap::updateCollision(Entity *entity, const float &dt)
                     {
                         entity->stopVelocityX();
                         entity->setPosition(wallBounds.left + wallBounds.width, playerBounds.top);
+                        entity->collision = true;
                     }
                 }
             }

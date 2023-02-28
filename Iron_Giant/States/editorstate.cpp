@@ -75,23 +75,25 @@ void EditorState::initGui()
     this->selectorRect.setTexture(this->tileMap->getTileTextureSheet());
     this->selectorRect.setTextureRect(this->textureRect);
 
-    this->textureSelector = new gui::TextureSelector(20.f, 20.f, 900.f, 300.f,
+    this->textureSelector = new gui::TextureSelector(20.f, 20.f, 700.f, 700.f,
                                                      this->stateData->gridSize, this->tileMap->getTileTextureSheet(),
                                                      this->font, "TS");
 }
 
 void EditorState::initTileMap()
 {
-    this->tileMap = new TileMap(this->stateData->gridSize, 100, 100, "Resources/Images/Tiles/tilesheet1.png");
+    this->tileMap = new TileMap(this->stateData->gridSize, 50, 50, "Resources/Images/Tiles/tilesheet3.png");
 }
 
 void EditorState::initPauseMenu()
 {
-    this->pmenu = new PauseMenu(*this->window, this->font);
+    const sf::VideoMode &vm = this->stateData->gfxSettings->resolution;
 
-    this->pmenu->addButton("QUIT", 800.f, "Quit");
-    this->pmenu->addButton("SAVE", 300.f, "Save map");
-    this->pmenu->addButton("LOAD", 400.f, "Load map");
+    this->pmenu = new PauseMenu(this->stateData->gfxSettings->resolution, this->font);
+
+    this->pmenu->addButton("QUIT", gui::p2pY(74.074f, vm), gui::p2pX(18.22917f, vm), gui::p2pY(6.481f, vm), gui::calcCharSize(14, vm), "Quit");
+    this->pmenu->addButton("SAVE", gui::p2pY(27.8f, vm), gui::p2pX(18.22917f, vm), gui::p2pY(6.481f, vm), gui::calcCharSize(14, vm), "Save map");
+    this->pmenu->addButton("LOAD", gui::p2pY(37.037f, vm), gui::p2pX(18.22917f, vm), gui::p2pY(6.481f, vm), gui::calcCharSize(14, vm), "Load map");
 }
 
 //contructors/destructors

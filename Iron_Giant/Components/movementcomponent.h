@@ -9,7 +9,7 @@ private:
     //variables
     sf::Sprite &sprite;
 
-    float maxVelocity;
+
     float acceleration;
     float deceleration;
 
@@ -18,6 +18,8 @@ private:
     //initializing functions
 
 public:
+    float maxVelocity;
+
     //constructors/destructors
     MovementComponent(sf::Sprite &sprite,
                       float maxVelocity, float acceleration, float deceleration);

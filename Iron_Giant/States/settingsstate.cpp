@@ -2,22 +2,6 @@
 #include "settingsstate.h"
 
 //initializing functions
-void SettingsState::initBackground()
-{
-    this->background.setSize(sf::Vector2f(
-                                 static_cast<float>(this->window->getSize().x),
-                                 static_cast<float>(this->window->getSize().y)
-                                 )
-                             );
-
-    if(!this->backgroundTexture.loadFromFile("Resources/Images/Backgrounds/menu_background.jpg"))
-    {
-        throw("ERROR::MAIN_MENU_STATE::COULD_NOT_LOAD_BACKGROUND_TEXTURE");
-    }
-
-    this->background.setTexture(&this->backgroundTexture);
-}
-
 void SettingsState::initVariables()
 {
     this->modes = sf::VideoMode::getFullscreenModes();
@@ -51,15 +35,32 @@ void SettingsState::initKeybinds()
 
 void SettingsState::initGui()
 {
+    const sf::VideoMode &vm = this->stateData->gfxSettings->resolution;
+
+
+    this->background.setSize(sf::Vector2f(
+                                 static_cast<float>(vm.width),
+                                 static_cast<float>(vm.height)
+                                 )
+                             );
+
+    if(!this->backgroundTexture.loadFromFile("Resources/Images/Backgrounds/menu_background.jpg"))
+    {
+        throw("ERROR::MAIN_MENU_STATE::COULD_NOT_LOAD_BACKGROUND_TEXTURE");
+    }
+
+    this->background.setTexture(&this->backgroundTexture);
+
+
     this->buttons["BACK"] = new gui::Button(
-                1040.f, 880.f, 350.f, 70.f,
-                &this->font, "Back", 14,
+                gui::p2pX(54.17f, vm), gui::p2pY(81.481f, vm), gui::p2pX(18.22917f, vm), gui::p2pY(6.481f, vm),
+                &this->font, "Back", gui::calcCharSize(14, vm),
                 sf::Color(240, 240, 240, 255), sf::Color(255, 255, 255, 255), sf::Color(100, 100, 100, 255),
                 sf::Color(70, 70, 70, 200), sf::Color(150, 150, 250, 255), sf::Color(20, 20, 20, 200));
 
     this->buttons["APPLY"] = new gui::Button(
-                590.f, 880.f, 350.f, 70.f,
-                &this->font, "Apply", 14,
+                gui::p2pX(30.72917f, vm), gui::p2pY(81.481f, vm), gui::p2pX(18.22917f, vm), gui::p2pY(6.481f, vm),
+                &this->font, "Apply", gui::calcCharSize(14, vm),
                 sf::Color(240, 240, 240, 255), sf::Color(255, 255, 255, 255), sf::Color(100, 100, 100, 255),
                 sf::Color(70, 70, 70, 200), sf::Color(150, 150, 250, 255), sf::Color(20, 20, 20, 200));
 
@@ -70,16 +71,15 @@ void SettingsState::initGui()
         modes_str.push_back(std::to_string(i.width) + 'x' + std::to_string(i.height));
     }
 
-    this->dropdownLists["RESOLUTION"] = new gui::DropDownList(800, 450, 200, 50, font, modes_str.data(), modes_str.size());
-}
+    this->dropdownLists["RESOLUTION"] = new gui::DropDownList(gui::p2pX(50.f, vm), gui::p2pY(31.481f, vm), gui::p2pX(10.416f, vm), gui::p2pY(4.62f, vm),
+                                                              font, modes_str.data(), modes_str.size());
 
-void SettingsState::initText()
-{
+
     this->optionsText.setFont(font);
 
-    this->optionsText.setPosition(sf::Vector2f(590.f, 350.f));
+    this->optionsText.setPosition(sf::Vector2f(gui::p2pX(30.72917f, vm), gui::p2pY(32.407f, vm)));
 
-    this->optionsText.setCharacterSize(25);
+    this->optionsText.setCharacterSize(gui::calcCharSize(25, vm));
 
     this->optionsText.setFillColor(sf::Color(255, 255, 255, 200));
 
@@ -88,16 +88,31 @@ void SettingsState::initText()
 );
 }
 
+void SettingsState::resetGui()
+{
+    for(auto it = this->buttons.begin(); it != this->buttons.end(); ++it)
+    {
+        delete it->second;
+    }
+    this->buttons.clear();
+
+    for(auto it = this->dropdownLists.begin(); it != this->dropdownLists.end(); ++it)
+    {
+        delete it->second;
+    }
+    this->dropdownLists.clear();
+
+    this->initGui();
+}
+
 //constructors/destructors
 SettingsState::SettingsState(StateData *state_data)
     : State(state_data)
 {
     this->initVariables();
-    this->initBackground();
     this->initFonts();
     this->initKeybinds();
     this->initGui();
-    this->initText();
 }
 
 SettingsState::~SettingsState()
@@ -138,6 +153,8 @@ void SettingsState::updateGui(const float &dt)
         this->stateData->gfxSettings->resolution = this->modes[this->dropdownLists["RESOLUTION"]->getActiveElementId()];
 
         this->window->create(this->stateData->gfxSettings->resolution, this->stateData->gfxSettings->title, sf::Style::Default);
+
+        this->resetGui();
     }
 
     for(auto &it2 : this->dropdownLists)

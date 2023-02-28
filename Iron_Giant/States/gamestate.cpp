@@ -49,13 +49,20 @@ void GameState::initTextures()
     {
         throw("ERROR::GAME_STATE::COULD_NOT_LOAD_PLAYER_TEXTURE");
     }
+
+    if(!this->textures["ENEMY_SHEET"].loadFromFile("Resources/Images/Sprites/Enemy/rat1_60x64.png"))
+    {
+        throw("ERROR::GAME_STATE::COULD_NOT_LOAD_ENEMY_TEXTURE");
+    }
 }
 
 void GameState::initPauseMenu()
 {
-    this->pmenu = new PauseMenu(*this->window, this->font);
+    const sf::VideoMode &vm = this->stateData->gfxSettings->resolution;
 
-    this->pmenu->addButton("QUIT", 800.f, "Quit");
+    this->pmenu = new PauseMenu(this->stateData->gfxSettings->resolution, this->font);
+
+    this->pmenu->addButton("QUIT", gui::p2pY(74.074f, vm), gui::p2pX(18.22917f, vm), gui::p2pY(6.481f, vm), gui::calcCharSize(14, vm), "Quit");
 }
 
 void GameState::initPlayer()
@@ -68,10 +75,33 @@ void GameState::initPlayerGUI()
     this->playerGUI = new PlayerGUI(this->player);
 }
 
+void GameState::initEnemy()
+{
+    this->mx = static_cast<float>((std::rand() % 3) - 1);
+    this->my = static_cast<float>((std::rand() % 3) - 1);
+    this->enemy = new Enemy(400, 400, this->textures["ENEMY_SHEET"], *this->player);
+}
+
 void GameState::initTileMap()
 {
-    this->tileMap = new TileMap(this->stateData->gridSize, 100, 100, "Resources/Images/Tiles/tilesheet1.png");
+    this->tileMap = new TileMap(this->stateData->gridSize, 50, 50, "Resources/Images/Tiles/tilesheet3.png");
     this->tileMap->loadFromFile("text.igmp");
+}
+
+void GameState::initGui()
+{
+    const sf::VideoMode &vm = this->stateData->gfxSettings->resolution;
+
+    this->endButton = new gui::Button(
+                static_cast<float>(vm.width) / 2.f - gui::p2pX(18.22917f, vm) / 2.f, gui::p2pY(74.074f, vm), gui::p2pX(18.22917f, vm), gui::p2pY(6.481f, vm),
+                &this->font, "End game", gui::calcCharSize(14, vm),
+                sf::Color(240, 240, 240, 255), sf::Color(255, 255, 255, 255), sf::Color(100, 100, 100, 255),
+                sf::Color(70, 70, 70, 200), sf::Color(150, 150, 250, 255), sf::Color(20, 20, 20, 200));
+
+    this->endText.setCharacterSize(gui::calcCharSize(200, vm));
+    this->endText.setFont(this->font);
+    this->endText.setString("END");
+    this->endText.setPosition(static_cast<float>(vm.width) / 2.f - this->endText.getGlobalBounds().width / 2.f, gui::p2pY(30.f, vm));
 }
 
 //contructors/destructors
@@ -84,10 +114,16 @@ GameState::GameState(StateData *state_data)
     this->initFonts();
     this->initTextures();
     this->initPauseMenu();
+    this->initGui();
 
     this->initPlayer();
     this->initPlayerGUI();
+    this->initEnemy();
     this->initTileMap();
+
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+    this->damaged = false;
+    this->damaging = false;
 }
 
 GameState::~GameState()
@@ -95,7 +131,9 @@ GameState::~GameState()
     delete this->pmenu;
     delete this->player;
     delete this->playerGUI;
+    delete this->enemy;
     delete this->tileMap;
+    delete this->endButton;
 }
 
 //update functions
@@ -142,6 +180,49 @@ void GameState::updatePlayerInput(const float &dt)
     }
 }
 
+void GameState::updateEnemyMovement(const float &dt)
+{
+    this->enemy->move(mx, my, dt);
+
+    if(this->enemy->collision || (this->mx == 0.f && this->my == 0.f))
+    {
+        this->mx = static_cast<float>((std::rand() % 3) - 1);
+        this->my = static_cast<float>((std::rand() % 3) - 1);
+        this->enemy->collision = false;
+    }
+}
+
+void GameState::updateEntitiesCollisions()
+{
+    if(this->enemy->getGlobalBounds().intersects(this->player->getGlobalBounds()) && this->damaged == false)
+    {
+        this->player->loseHp(2);
+        this->damaged = true;
+    }
+
+    if(!this->enemy->getGlobalBounds().intersects(this->player->getGlobalBounds()))
+    {
+        this->damaged = false;
+    }
+
+    if((this->player->attackHitboxLeft.getGlobalBounds().intersects(this->enemy->getGlobalBounds()) && this->player->attacking && this->damaging == false)
+            || (this->player->attackHitboxRight.getGlobalBounds().intersects(this->enemy->getGlobalBounds()) && this->player->attacking && this->damaging == false))
+    {
+        this->damaging = true;
+        this->player->gainExp(50);
+        this->enemy->setPosition(static_cast<float>((std::rand() % 200) + 300), static_cast<float>((std::rand() % 200) + 300));
+        this->mx = static_cast<float>((std::rand() % 3) - 1);
+        this->my = static_cast<float>((std::rand() % 3) - 1);
+        this->enemy->speed += 10.f;
+    }
+
+    if(!this->player->attackHitboxLeft.getGlobalBounds().intersects(this->enemy->getGlobalBounds()) && !this->player->attacking
+            && !this->player->attackHitboxRight.getGlobalBounds().intersects(this->enemy->getGlobalBounds()))
+    {
+        this->damaging = false;
+    }
+}
+
 void GameState::updatePlayerGUI(const float &dt)
 {
     this->playerGUI->update(dt);
@@ -159,30 +240,60 @@ void GameState::updateTileMap(const float &dt)
 {
     this->tileMap->update();
     this->tileMap->updateCollision(this->player, dt);
+    this->tileMap->updateCollision(this->enemy, dt);
+}
+
+void GameState::updateGui()
+{
+    this->endButton->update(this->mousePosWindow);
+
+    if(this->endButton->isPressed())
+    {
+        this->endState();
+    }
 }
 
 void GameState::update(const float &dt)
 {
     this->updateMousePositions(&this->view);
     this->updateKeytime(dt);
-    this->updateInput(dt);
+    if(!this->player->dead)
+    {
+        this->updateInput(dt);
+    }
 
     if(!this->paused)
     {
         this->updateView(dt);
 
-        this->updatePlayerInput(dt);
+        if(!this->player->dead)
+        {
+            this->updatePlayerInput(dt);
+        }
+
+        this->updateEnemyMovement(dt);
+
+        if(!this->player->dead)
+        {
+            this->updateEntitiesCollisions();
+        }
 
         this->updateTileMap(dt);
 
         this->player->update(dt);
 
         this->playerGUI->update(dt);
+
+        this->enemy->update(dt);
     }
-    else
+    else if(!this->player->dead)
     {
         this->pmenu->update(this->mousePosWindow);
         this->updatePauseMenuButtons();
+    }
+    if(this->player->dead)
+    {
+        this->updateGui();
     }
 }
 
@@ -201,15 +312,26 @@ void GameState::render(sf::RenderTarget *target)
 
     this->player->render(this->renderTexture);
 
+    this->enemy->render(this->renderTexture);
+
     this->tileMap->renderDeferred(this->renderTexture);
 
     this->renderTexture.setView(this->renderTexture.getDefaultView());
     this->playerGUI->render(this->renderTexture);
 
-    if(this->paused)
+    if(this->paused && !this->player->dead)
     {
         //this->renderTexture.setView(this->renderTexture.getDefaultView());
         this->pmenu->render(this->renderTexture);
+    }
+
+    if(this->player->getAttributeComponent()->hp == 0)
+    {
+        this->player->dead = true;
+        this->player->stopVelocity();
+
+        this->endButton->render(this->renderTexture);
+        this->renderTexture.draw(this->endText);
     }
 
     this->renderTexture.display();

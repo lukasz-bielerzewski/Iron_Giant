@@ -20,6 +20,7 @@ SOURCES += \
     Components/attributecomponent.cpp \
     Components/hitboxcomponent.cpp \
     Components/movementcomponent.cpp \
+    Entities/enemy.cpp \
     Entities/entity.cpp \
     GUI/pausemenu.cpp \
     GUI/playergui.cpp \
@@ -41,6 +42,7 @@ HEADERS += \
     Components/attributecomponent.h \
     Components/hitboxcomponent.h \
     Components/movementcomponent.h \
+    Entities/enemy.h \
     Entities/entity.h \
     GUI/pausemenu.h \
     GUI/playergui.h \

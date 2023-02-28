@@ -7,6 +7,7 @@ void Entity::initVariables()
     this->hitboxComponent = nullptr;
     this->movementComponent = nullptr;
     this->animationComponent = nullptr;
+    this->collision = false;
 }
 
 //constructors/destructors

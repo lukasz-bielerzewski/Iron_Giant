@@ -5,6 +5,7 @@
 #include "Components/movementcomponent.h"
 #include "Components/animationcomponent.h"
 #include "Components/attributecomponent.h"
+#include <random>
 
 //forward declarations
 class HitboxComponent;
@@ -27,6 +28,8 @@ protected:
     AttributeComponent *attributeComponent;
 
 public:
+    bool collision;
+
     //constructors/destructors
     Entity();
     virtual ~Entity();

@@ -1,6 +1,21 @@
 #include "Source_Files/pch.h"
 #include "gui.h"
 
+float gui::p2pX(const float perc, const sf::VideoMode &vm)
+{
+    return std::floor(static_cast<float>(vm.width) * (perc / 100.f));
+}
+
+float gui::p2pY(const float perc, const sf::VideoMode &vm)
+{
+    return std::floor(static_cast<float>(vm.height) * (perc / 100.f));
+}
+
+unsigned gui::calcCharSize(const unsigned size, const sf::VideoMode &vm)
+{
+    return static_cast<unsigned>(((vm.width + vm.height) * size / 3000));
+}
+
 //=====Button=====
 //constructors/destructors
 gui::Button::Button(float x, float y, float width, float height,
@@ -245,7 +260,7 @@ gui::TextureSelector::TextureSelector(float x, float y, float width, float heigh
     this->active = false;
     this->gridSize = gridSize;
     this->hidden = false;
-    float offset = 100.f;
+    float offset = gridSize;
 
     this->bounds.setSize(sf::Vector2f(width, height));
     this->bounds.setPosition(x + offset, y);
